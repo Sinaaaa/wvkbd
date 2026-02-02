@@ -4,7 +4,14 @@
 
 ## Features
 
-This my fork of wvkbd, beyond a custom HU layout I have also made some minor changes to fit my needs.
+This is my fork of wvkbd, beyond a custom HU layout I have also made some minor changes to fit my needs:
+
+-large side margins so it looks palatable on a large display.
+
+-Fully transparent layer shell background, so it doesn't draw over vertical bars.
+
+-Added a tacky red exit button, so I can close the keyboard more easily.
+
 
 ## Install
 
