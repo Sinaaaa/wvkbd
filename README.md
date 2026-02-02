@@ -10,7 +10,7 @@ This is my fork of wvkbd, beyond a custom HU layout I have also made some minor 
 
 -Fully transparent layer shell background, so it doesn't draw over vertical bars.
 
--Added a tacky red exit button, so I can close the keyboard more easily.
+-Added a tacky red exit button, so now the keyboard can be closed more easily.
 
 
 ## Install
