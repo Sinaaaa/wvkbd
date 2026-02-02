@@ -1,37 +1,10 @@
 # wvkbd - On-screen keyboard for wlroots that sucks less
 
-<img src="https://raw.githubusercontent.com/jjsullivan5196/wvkbd/master/contrib/wvkbd-mobintl.jpg" width=300 /> <img src="https://raw.githubusercontent.com/jjsullivan5196/wvkbd/master/contrib/wvkbd-mobintl-cyrillic.jpg" width=300 />
 
-This project aims to deliver a minimal but practically usable implementation of a wlroots on-screen
-keyboard in legible C. This will **only** be a keyboard, not a feedback buzzer,
-led blinker, or anything that requires more than what's needed to input text
-quickly. The end product should be a static codebase that can be patched to add
-new features.
 
 ## Features
 
- - Typing, modifier locking, layout switching
- - Positive visual feedback on key presses
- - Custom layouts and underlying keymaps
- - On-the-fly layout and keymap switching
- - Custom color schemes
- - Proper font drawing
- - Intuitive layouts
- - International layouts (cyrillic, arabic, persian, greek, georgian)
- - Support for 'Copy' keys which are not on the keymap
- - Emoji support
- - Compose key for character variants (e.g. diacritics)
- - Show/hide keyboard on signals (SIGUSR1 = hide, SIGUSR2 = show, SIGRTMIN = toggle)
- - Automatic portrait/landscape detection and subsequent layout switching
-
-
-<img src="https://raw.githubusercontent.com/jjsullivan5196/wvkbd/master/contrib/wvkbd-mobintl-landscape.jpg" width=640 />
-
-There are some areas that still need work:
-
- - Make sure the virtual input method in wayland is working as best as it can
- - Support for input method protocol in wayland, ability to respond to text
-   fields
+This my fork of wvkbd, beyond a custom HU layout I have also made some minor changes to fit my needs.
 
 ## Install
 
