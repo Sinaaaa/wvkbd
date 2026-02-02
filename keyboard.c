@@ -204,27 +204,34 @@ kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
 void
 kbd_init_layout(struct layout *l, uint32_t width, uint32_t height)
 {
-    uint32_t x = 0, y = 0;
-    uint8_t rows = kbd_get_rows(l);
+    /* --- FIXED SECTION --- */
+    uint32_t margin = 380; // Your desired margin MARGIN ON THE SIDES MARGIN MARGIN AND MARGIN GOSH
+    uint32_t usable_width = width - (margin * 2);
+    uint32_t x = margin, y = 0; 
+    /* ---------------------- */
 
+    uint8_t rows = kbd_get_rows(l);
     l->keyheight = height / rows;
 
     struct key *k = l->keys;
     double rowlength = kbd_get_row_length(k);
-    double rowwidth = 0.0;
+    double rowwidth = 0.0; // <--- Make sure this line exists!
+
     while (k->type != Last) {
         if (k->type == EndRow) {
             y += l->keyheight;
-            x = 0;
-            rowwidth = 0.0;
+            x = margin; // Reset to margin
+            rowwidth = 0.0; // Reset rowwidth
             rowlength = kbd_get_row_length(k + 1);
         } else if (k->width > 0) {
             k->x = x;
             k->y = y;
-            k->w = ((double)width / rowlength) * k->width;
+            k->w = ((double)usable_width / rowlength) * k->width;
             x += k->w;
-            rowwidth += k->width;
-            if (x < (rowwidth / rowlength) * (double)width) {
+            rowwidth += k->width; // <--- This was missing!
+            
+            // Fixed the logic check here to include the margin offset
+            if (x < (rowwidth / rowlength) * (double)usable_width + margin) {
                 k->w++;
                 x++;
             }
@@ -369,6 +376,16 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
 {
+	
+	
+/* PASTE THE EXIT LOGIC RIGHT HERE */
+    if (k->label && strcmp(k->label, "🔴") == 0) {
+        exit(0);
+    }
+    /* ------------------------------ */	
+	
+	
+	
     if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod)) {
         if ((k->type == NextLayer) || (k->type == BackLayer) ||
             ((k->type == Code) && (k->code == KEY_SPACE))) {
@@ -603,7 +620,7 @@ kbd_draw_layout(struct kbd *kb)
     if (kb->debug)
         fprintf(stderr, "Draw layout\n");
 
-    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
+    drw_fill_rectangle(d, (Color){0}, 0, 0, kb->w, kb->h, 0);
 
     while (next_key->type != Last) {
         if ((next_key->type == Pad) || (next_key->type == EndRow)) {
