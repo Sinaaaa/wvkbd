@@ -204,40 +204,57 @@ kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
 void
 kbd_init_layout(struct layout *l, uint32_t width, uint32_t height)
 {
-    /* --- FIXED SECTION --- */
-    uint32_t margin = 380; // Your desired margin MARGIN ON THE SIDES MARGIN MARGIN AND MARGIN GOSH
+    uint32_t margin = 380; 
     uint32_t usable_width = width - (margin * 2);
-    uint32_t x = margin, y = 0; 
-    /* ---------------------- */
+    uint32_t x_start = margin, y = 0; 
 
     uint8_t rows = kbd_get_rows(l);
     l->keyheight = height / rows;
 
     struct key *k = l->keys;
-    double rowlength = kbd_get_row_length(k);
-    double rowwidth = 0.0; // <--- Make sure this line exists!
-
+    
     while (k->type != Last) {
         if (k->type == EndRow) {
             y += l->keyheight;
-            x = margin; // Reset to margin
-            rowwidth = 0.0; // Reset rowwidth
-            rowlength = kbd_get_row_length(k + 1);
-        } else if (k->width > 0) {
-            k->x = x;
-            k->y = y;
-            k->w = ((double)usable_width / rowlength) * k->width;
-            x += k->w;
-            rowwidth += k->width; // <--- This was missing!
-            
-            // Fixed the logic check here to include the margin offset
-            if (x < (rowwidth / rowlength) * (double)usable_width + margin) {
-                k->w++;
-                x++;
-            }
+            k++;
+            continue;
         }
-        k->h = l->keyheight;
-        k++;
+
+        // 1. Scan row for F-keys and total weight
+        double row_weight = 0;
+        uint32_t fixed_pixels = 0;
+        struct key *row_scan = k;
+        while (row_scan->type != Last && row_scan->type != EndRow) {
+            if (row_scan->label && row_scan->label[0] == 'F' && row_scan->label[1] >= '1' && row_scan->label[1] <= '5' && row_scan->label[2] == '\0') {
+                fixed_pixels += 80;
+            } else {
+                row_weight += row_scan->width;
+            }
+            row_scan++;
+        }
+
+        uint32_t remaining_width = (fixed_pixels < usable_width) ? (usable_width - fixed_pixels) : 0;
+        double x_accumulator = x_start;
+
+        // 2. Assign widths with pixel-perfect tracking
+        while (k->type != Last && k->type != EndRow) {
+            k->y = y;
+            k->h = l->keyheight;
+            k->x = (uint32_t)x_accumulator; // Floor the start position
+
+            double target_w;
+            if (k->label && k->label[0] == 'F' && k->label[1] >= '1' && k->label[1] <= '5' && k->label[2] == '\0') {
+                target_w = 80.0;
+            } else if (row_weight > 0) {
+                target_w = (remaining_width * k->width) / row_weight;
+            } else {
+                target_w = 0;
+            }
+
+            x_accumulator += target_w;
+            k->w = (uint32_t)x_accumulator - k->x; // Calculate width based on next start point
+            k++;
+        }
     }
 }
 
