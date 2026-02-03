@@ -301,57 +301,6 @@ kbd_get_layer_index(struct kbd *kb, struct layout *l)
 void
 zwp_virtual_keyboard_v1_key_mods(struct zwp_virtual_keyboard_v1 *vkbd, uint32_t time, uint32_t mods, enum wl_keyboard_key_state state)
 {
-    if (!kb->last_press)
-        return;
-
-    /*  special logic for handling the > and < buttons */
-    if (kb->last_press->label && (strcmp(kb->last_press->label, "<") == 0 || strcmp(kb->last_press->label, ">") == 0)) {
-        uint32_t code = (strcmp(kb->last_press->label, "<") == 0) ? KEY_COMMA : KEY_DOT;
-        
-        /* Release key firs */
-        zwp_virtual_keyboard_v1_key(kb->vkbd, time, code, WL_KEYBOARD_KEY_STATE_RELEASED);
-        
-        /* Reset mods */
-        zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
-        
-        /* Cleanup maybe */
-        kbd_draw_key(kb, kb->last_press, Unpress);
-        kb->last_press = NULL;
-        return;
-    }
-    /* end of our new code block, why is this so hard */
-
-    bool unlatch_shift, unlatch_ctrl, unlatch_alt, unlatch_super, unlatch_altgr;
-    unlatch_shift = unlatch_ctrl = unlatch_alt = unlatch_super = unlatch_altgr = false;
-
-    unlatch_shift = (kb->mods & Shift) == Shift;
-    unlatch_ctrl = (kb->mods & Ctrl) == Ctrl;
-    unlatch_alt = (kb->mods & Alt) == Alt;
-    unlatch_super = (kb->mods & Super) == Super;
-    unlatch_altgr = (kb->mods & AltGr) == AltGr;
-
-    if (unlatch_shift) kb->mods ^= Shift;
-    if (unlatch_ctrl) kb->mods ^= Ctrl;
-    if (unlatch_alt) kb->mods ^= Alt;
-    if (unlatch_super) kb->mods ^= Super;
-    if (unlatch_altgr) kb->mods ^= AltGr;
-
-    if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr) {
-        zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
-    }
-
-    if (kb->last_press->type == Copy) {
-        zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
-                                    WL_KEYBOARD_KEY_STATE_RELEASED);
-    } else {
-        if ((kb->shift_space_is_tab) && (kb->last_press->code == KEY_SPACE) && (unlatch_shift)) {
-            // shift + space is tab
-            zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
-                                        WL_KEYBOARD_KEY_STATE_RELEASED);
-        } else {
-            zwp_virtual_keyboard_v1_key(kb->vkbd, time,
-                                        kb->last_press->code,
-                                        WL_KEYBOARD_KEY_STATE_RELEASED);
     if ((mods & Shift) == Shift)
         zwp_virtual_keyboard_v1_key(vkbd, time, KEY_LEFTSHIFT, state);
     if ((mods & CapsLock) == CapsLock)
@@ -429,21 +378,10 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
         } else {
             kbd_draw_key(kb, kb->last_press, Unpress);
         }
-    }
 
-    if (kb->compose >= 2) {
-        kb->compose = 0;
-        kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
-    } else if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr) {
-        kbd_draw_layout(kb);
-    } else {
-        kbd_draw_key(kb, kb->last_press, Unpress);
+        kb->last_press = NULL;
     }
-
-    kb->last_press = NULL;
 }
-
-
 
 void
 kbd_release_key(struct kbd *kb, uint32_t time)
@@ -489,22 +427,13 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
 {
-    /* Very Tacky Red Exit button's basic logic */
+	
+	
+/* PASTE THE EXIT LOGIC RIGHT HERE */
     if (k->label && strcmp(k->label, "🔴") == 0) {
         exit(0);
     }
-
-    /* Logic for exclusive < > button*/
-    if (k->label && (strcmp(k->label, "<") == 0 || strcmp(k->label, ">") == 0)) {
-        uint32_t code = (strcmp(k->label, "<") == 0) ? KEY_COMMA : KEY_DOT;
-        kb->last_press = k;
-        zwp_virtual_keyboard_v1_modifiers(kb->vkbd, Shift, 0, 0, 0);
-        zwp_virtual_keyboard_v1_key(kb->vkbd, time, code, WL_KEYBOARD_KEY_STATE_PRESSED);
-        kbd_draw_key(kb, k, Press);
-        return; /* we need this, righto? */
-    }
-	
-
+    /* ------------------------------ */	
 	
 	
 	

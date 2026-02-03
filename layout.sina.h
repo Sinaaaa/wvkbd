@@ -188,11 +188,9 @@ static struct key keys_full[] = {
   {"F2", "F2", 1.0, Code, KEY_F2, .scheme = 1},
   {"", "", 0.0, EndRow},
 
-  //{"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
+  {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
 
   {"Caps", "Caps", 1.0, Mod, CapsLock, .scheme = 1},
-  { "<", "<", 0.5, Code, 0 },
-  { ">", ">", 0.5, Code, 0 },
   {"a", "A", 1.0, Code, KEY_A, &layouts[ComposeA]},
   {"s", "S", 1.0, Code, KEY_S, &layouts[ComposeS]},
   {"d", "D", 1.0, Code, KEY_D, &layouts[ComposeD]},
