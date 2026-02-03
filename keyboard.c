@@ -320,7 +320,18 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
 {
     bool unlatch_shift, unlatch_ctrl, unlatch_alt, unlatch_super, unlatch_altgr, unlatch_tab;
     unlatch_shift = unlatch_ctrl = unlatch_alt = unlatch_super = unlatch_altgr = unlatch_tab = false;
+
     if (kb->last_press) {
+        /* Sina Edition: Bracket logic release */
+        if (kb->last_press->label && (strcmp(kb->last_press->label, "<") == 0 || strcmp(kb->last_press->label, ">") == 0)) {
+            uint32_t code = (strcmp(kb->last_press->label, "<") == 0) ? KEY_COMMA : KEY_DOT;
+            zwp_virtual_keyboard_v1_key(kb->vkbd, time, code, WL_KEYBOARD_KEY_STATE_RELEASED);
+            zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
+            kbd_draw_key(kb, kb->last_press, Unpress);
+            kb->last_press = NULL;
+            return;
+        }
+
         unlatch_shift = (kb->mods & Shift) == Shift;
         unlatch_ctrl = (kb->mods & Ctrl) == Ctrl;
         unlatch_alt = (kb->mods & Alt) == Alt;
@@ -427,16 +438,22 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
 {
-	
-	
-/* PASTE THE EXIT LOGIC RIGHT HERE */
+    /* PASTE THE EXIT LOGIC RIGHT HERE */
     if (k->label && strcmp(k->label, "🔴") == 0) {
         exit(0);
     }
-    /* ------------------------------ */	
-	
-	
-	
+    /* ------------------------------ */
+
+    /* Sina Edition: Bracket logic press */
+    if (k->label && (strcmp(k->label, "<") == 0 || strcmp(k->label, ">") == 0)) {
+        uint32_t code = (strcmp(k->label, "<") == 0) ? KEY_COMMA : KEY_DOT;
+        kb->last_press = k;
+        zwp_virtual_keyboard_v1_modifiers(kb->vkbd, Shift, 0, 0, 0);
+        zwp_virtual_keyboard_v1_key(kb->vkbd, time, code, WL_KEYBOARD_KEY_STATE_PRESSED);
+        kbd_draw_key(kb, k, Press);
+        return;
+    }
+
     if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod)) {
         if ((k->type == NextLayer) || (k->type == BackLayer) ||
             ((k->type == Code) && (k->code == KEY_SPACE))) {
