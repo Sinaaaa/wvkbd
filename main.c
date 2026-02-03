@@ -129,7 +129,7 @@ static const struct wl_pointer_listener pointer_listener = {
     .leave = wl_pointer_leave,
     .motion = wl_pointer_motion,
     .button = wl_pointer_button,
-    .axis = wl_pointer_axis,
+    .axis = wl_pointer_axis,  
 };
 
 static const struct wl_touch_listener touch_listener = {
@@ -359,11 +359,8 @@ void
 wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                 uint32_t axis, wl_fixed_t value)
 {
-    if(!layer_surface_configured || !popup_xdg_surface_configured) {
-        return;
-    }
-
-    kbd_next_layer(&keyboard, NULL, (value >= 0));
+    /* Logic removed to disable scroll-to-switch-layer */
+    return;
 }
 
 void
