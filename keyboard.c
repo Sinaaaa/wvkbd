@@ -38,7 +38,7 @@ kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index)
     if ((!kb->prevlayout) ||
         (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
         fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
-        create_and_upload_keymap(kb, kb->layout->keymap_name, 0, 0);
+        create_and_upload_keymap(kb, kb->layout->keymap_name, 0);
     }
     kbd_draw_layout(kb);
 }
@@ -198,7 +198,7 @@ kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
     kb->last_abc_layout = &kb->layouts[layer];
 
     /* upload keymap */
-    create_and_upload_keymap(kb, kb->layout->keymap_name, 0, 0);
+    create_and_upload_keymap(kb, kb->layout->keymap_name, 0);
 }
 
 void
@@ -339,9 +339,11 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
         unlatch_altgr = (kb->mods & AltGr) == AltGr;
 
         if (kb->last_press->type == Copy) {
+            if (kb->debug) fprintf(stderr, "release copy key (unlatch_shift=%d, mods=%d)\n", unlatch_shift, kb->mods);
             zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
                                         WL_KEYBOARD_KEY_STATE_RELEASED);
         } else {
+            if (kb->debug) fprintf(stderr, "release key %d", kb->last_press->code);
             if ((kb->shift_space_is_tab) && (kb->last_press->code == KEY_SPACE) && (unlatch_shift)) {
                 // shift + space is tab
                 unlatch_shift = false;
@@ -357,6 +359,7 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
         }
 
         if (unlatch_shift) {
+            if (kb->debug) fprintf(stderr, "unlatch shift");
             kb->mods ^= Shift;
             zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, Shift, WL_KEYBOARD_KEY_STATE_RELEASED);
         }
@@ -511,8 +514,12 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
     case Mod:
         kb->mods ^= k->code;
         if (kb->mods & k->code) {
+            if (kb->debug)
+                fprintf(stderr, "mod pressed\n");
             zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, k->code, WL_KEYBOARD_KEY_STATE_PRESSED);
         } else {
+            if (kb->debug)
+                fprintf(stderr, "mod released\n");
             zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, k->code, WL_KEYBOARD_KEY_STATE_RELEASED);
         }
         if ((k->code == Shift) || (k->code == CapsLock)) {
@@ -574,10 +581,15 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         // copy code as unicode chr by setting a temporary keymap
         kb->last_swipe = kb->last_press = k;
         kbd_draw_key(kb, k, Press);
-        if (kb->debug)
-            fprintf(stderr, "pressing copy key\n");
-        create_and_upload_keymap(kb, kb->layout->keymap_name, k->code,
-                                 k->code_mod);
+        if (kb->mods & Shift) {
+            if (kb->debug)
+                    fprintf(stderr, "Pressing copy key (with shift)\n");
+            create_and_upload_keymap(kb, kb->layout->keymap_name, k->code_mod
+        } else {
+            if (kb->debug)
+                    fprintf(stderr, "Pressing copy key\n");
+            create_and_upload_keymap(kb, kb->layout->keymap_name, k->code);
+        }
         zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
         zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
                                     WL_KEYBOARD_KEY_STATE_PRESSED);
@@ -750,8 +762,7 @@ draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
 }
 
 void
-create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr,
-                         uint32_t comp_shift_unichr)
+create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr)
 {
     int keymap_index = -1;
     for (int i = 0; i < NUMKEYMAPS; i++) {
@@ -766,7 +777,7 @@ create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr,
     const char *keymap_template = keymaps[keymap_index];
     size_t keymap_size = strlen(keymap_template) + 64;
     char *keymap_str = malloc(keymap_size);
-    sprintf(keymap_str, keymap_template, comp_unichr, comp_shift_unichr);
+    sprintf(keymap_str, keymap_template, comp_unichr, comp_unichr);
     keymap_size = strlen(keymap_str);
     int keymap_fd = os_create_anonymous_file(keymap_size);
     if (keymap_fd < 0) {
