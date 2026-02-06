@@ -583,8 +583,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         kbd_draw_key(kb, k, Press);
         if (kb->mods & Shift) {
             if (kb->debug)
-                    fprintf(stderr, "Pressing copy key (with shift)\n");
-            create_and_upload_keymap(kb, kb->layout->keymap_name, k->code_mod
+                fprintf(stderr, "Pressing copy key (with shift)\n");
+            create_and_upload_keymap(kb, kb->layout->keymap_name, k->code_mod);
         } else {
             if (kb->debug)
                     fprintf(stderr, "Pressing copy key\n");
