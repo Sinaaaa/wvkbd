@@ -583,7 +583,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         kbd_draw_key(kb, k, Press);
         if (kb->mods & Shift) {
             if (kb->debug)
-                fprintf(stderr, "Pressing copy key (with shift)\n");
+                    fprintf(stderr, "Pressing copy key (with shift)\n");
             create_and_upload_keymap(kb, kb->layout->keymap_name, k->code_mod);
         } else {
             if (kb->debug)
@@ -604,9 +604,13 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
 void
 kbd_print_key_stdout(struct kbd *kb, struct key *k)
 {
-    /* printed keys may slightly differ from the actual output
+    /* Printed keys may slightly differ from the actual output
      * we generally print what is on the key LABEL and only support the normal
-     * and shift layers. Other modifiers produce no output (Ctrl,Alt)
+     * and shift layers. Other modifiers produce no output (Ctrl,Alt).
+     * If a label has more than one character,
+     * only the first character is printed,
+     * because downpipe programs otherwise have no way of differentiating a swipe
+     * from a single keypress.
      * */
 
     bool handled = true;
@@ -635,11 +639,32 @@ kbd_print_key_stdout(struct kbd *kb, struct key *k)
     if (!handled) {
         if ((kb->mods & Shift) || 
             ((kb->mods & CapsLock) & (strlen(k->label) == 1 && isalpha(k->label[0]))))
-            printf("%s", k->shift_label);
+            kbd_print_first_utf8_char_stdout(k->shift_label);
         else if (!(kb->mods & Ctrl) && !(kb->mods & Alt) && !(kb->mods & Super))
-            printf("%s", k->label);
+            kbd_print_first_utf8_char_stdout(k->label);
     }
     fflush(stdout);
+}
+
+void kbd_print_first_utf8_char_stdout(const char *str) {
+    unsigned char c = (unsigned char)str[0];
+    int len;
+
+    if ((c & 0x80) == 0) {
+        len = 1;
+    } else if ((c & 0xE0) == 0xC0) {
+        len = 2;
+    } else if ((c & 0xF0) == 0xE0) {
+        len = 3;
+    } else if ((c & 0xF8) == 0xF0) {
+        len = 4;
+    } else {
+        len = 1; // Invalid UTF-8
+    }
+
+    for (int i = 0; i < len && str[i] != '\0'; i++) {
+        putchar(str[i]);
+    }
 }
 
 void
@@ -667,19 +692,26 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
     case Unpress:
         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
                    scheme->fg, scheme->rounding);
+        drw_draw_text(kb->surf, scheme->text, k->x, k->y, k->w, k->h,
+                  KBD_KEY_BORDER, label, scheme->font_description);
         break;
     case Press:
         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
                    scheme->high, scheme->rounding);
+        drw_draw_text(kb->surf, scheme->text_press, k->x, k->y, k->w, k->h,
+                  KBD_KEY_BORDER, label, scheme->font_description);
         break;
     case Swipe:
         draw_over_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
                         scheme->swipe, scheme->rounding);
+        drw_draw_text(kb->surf, scheme->text_swipe, k->x, k->y, k->w, k->h,
+                  KBD_KEY_BORDER, label, scheme->font_description);
         break;
+    default:
+        drw_draw_text(kb->surf, scheme->text, k->x, k->y, k->w, k->h,
+                  KBD_KEY_BORDER, label, scheme->font_description);
     }
 
-    drw_draw_text(kb->surf, scheme->text, k->x, k->y, k->w, k->h,
-                  KBD_KEY_BORDER, label, scheme->font_description);
 
     if (type == Press || type == Unpress) {
         kbd_clear_last_popup(kb);
@@ -693,7 +725,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
                            kb->last_popup_y, k->w, k->h, scheme->rounding);
         draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h,
                    KBD_KEY_BORDER, scheme->high, scheme->rounding);
-        drw_draw_text(kb->popup_surf, scheme->text, k->x, kb->last_popup_y,
+        drw_draw_text(kb->popup_surf, scheme->text_press, k->x, kb->last_popup_y,
                       k->w, k->h, KBD_KEY_BORDER, label,
                       scheme->font_description);
     }

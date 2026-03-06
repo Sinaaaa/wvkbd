@@ -616,6 +616,14 @@ usage(char *argv0)
     fprintf(stderr,
             "  --text-sp [rrggbb|aa]  - Set color of text on special keys\n");
     fprintf(stderr,
+            "  --text-press [rrggbb|aa]  - Set color of text on pressed keys\n");
+    fprintf(stderr,
+            "  --text-press-sp [rrggbb|aa]  - Set color of text on pressed special keys\n");
+    fprintf(stderr,
+            "  --text-swipe [rrggbb|aa]  - Set color of text on swiped keys\n");
+    fprintf(stderr,
+            "  --text-swipe-sp [rrggbb|aa]  - Set color of text on swiped special keys\n");
+    fprintf(stderr,
             "  --list-layers          - Print the list of available layers\n");
     fprintf(stderr,
             "  -l                     - Comma separated list of layers\n");
@@ -899,6 +907,34 @@ main(int argc, char **argv)
                 exit(1);
             }
             set_kbd_colors(keyboard.schemes[1].text.bgra, argv[++i]);
+        } else if ((!strcmp(argv[i], "-text-press")) ||
+                   (!strcmp(argv[i], "--text-press"))) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            set_kbd_colors(keyboard.schemes[0].text_press.bgra, argv[++i]);
+        } else if ((!strcmp(argv[i], "-text-press-sp")) ||
+                   (!strcmp(argv[i], "--text-press-sp"))) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            set_kbd_colors(keyboard.schemes[1].text_press.bgra, argv[++i]);
+        } else if ((!strcmp(argv[i], "-text-swipe")) ||
+                   (!strcmp(argv[i], "--text-swipe"))) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            set_kbd_colors(keyboard.schemes[0].text_swipe.bgra, argv[++i]);
+        } else if ((!strcmp(argv[i], "-text-swipe-sp")) ||
+                   (!strcmp(argv[i], "--text-swipe-sp"))) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            set_kbd_colors(keyboard.schemes[1].text_swipe.bgra, argv[++i]);
         } else if (!strcmp(argv[i], "-H")) {
             if (i >= argc - 1) {
                 usage(argv[0]);
