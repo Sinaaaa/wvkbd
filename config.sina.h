@@ -3,7 +3,7 @@
 
 #define DEFAULT_FONT "Sans 18"
 #define DEFAULT_ROUNDING 5
-static const int transparency = 200;
+static const int transparency = 170;
 
 struct clr_scheme schemes[] = {
 {
@@ -12,20 +12,42 @@ struct clr_scheme schemes[] = {
   .fg = {.bgra = {45, 45, 45, transparency}},  /* Buttons stay at 200 (solid-ish) */
   .high = {.bgra = {100, 100, 100, transparency}},
   .swipe = {.bgra = {100, 255, 100, 64}},
-  .text = {.color = UINT32_MAX},
+  .text = {.bgra = {255, 229, 207, transparency}},   /* TEXT COLOR NORMAL */
   .font = DEFAULT_FONT,
   .rounding = DEFAULT_ROUNDING,
 },
 {
   /* colors */
   .bg = {.bgra = {15, 15, 15, transparency}},
-  .fg = {.bgra = {32, 32, 32, transparency}},
+  .fg = {.bgra = {89, 80, 71, 100}},
   .high = {.bgra = {100, 100, 150, transparency}},
   .swipe = {.bgra = {100, 255, 100, 64}},
-  .text = {.color = UINT32_MAX},
+  .text = {.bgra = {255, 229, 207, transparency}},
   .font = DEFAULT_FONT,
   .rounding = DEFAULT_ROUNDING,
-}
+},
+
+{
+    /* Scheme [2] - Your New Scheme ESC */
+    .bg = {.bgra = {228, 199, 195, transparency}}, 
+    .fg = {.bgra = {18, 17, 69, transparency}},    /* BACKGROUND SECTION */ 
+    .high = {.bgra = {100, 100, 255, transparency}}, /* Bright Red when pressed */
+    .swipe = {.bgra = {100, 255, 100, 64}},
+    .text = {.bgra = {255, 229, 207, transparency}},
+    .font = DEFAULT_FONT,
+    .rounding = DEFAULT_ROUNDING,
+  },
+  
+{
+    /* Scheme [3] - Your New Scheme */
+    .bg = {.bgra = {228, 199, 195, transparency}},  
+    .fg = {.bgra = {228, 199, 195, transparency}},    /* Dark Red background */ 
+    .high = {.bgra = {228, 199, 195,transparency}}, /* Bright Red when pressed */
+    .swipe = {.bgra = {228, 199, 195, 64}},
+	.text = {.bgra = {49, 33, 30, transparency}},
+    .font = DEFAULT_FONT,
+    .rounding = DEFAULT_ROUNDING,
+  },  
 };
 
 /* layers is an ordered list of layouts, used to cycle through */
