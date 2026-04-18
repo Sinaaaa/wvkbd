@@ -32,7 +32,7 @@ To run my layout use the command `./wvkbd-sina -L 250` withing your wvkbd folder
 
 
 
-## Contribute
+## To contribute to the original wvkbd project
 
 Any contributions are welcome, there are two ways to contribute, the first one is **preferred**:
 
