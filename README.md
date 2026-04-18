@@ -12,6 +12,11 @@ This is my fork of wvkbd, beyond a custom HU layout I have also made some minor 
 
 -Added a tacky red exit button, so now the keyboard can be closed more easily.
 
+-Added a bunch of special characters so compose mode doesn't need to be used anymore outside of capital letters.
+
+-Added a media key section to the bottom row.
+
+-Theming choices..
 
 ## Dependencies
 
