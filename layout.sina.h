@@ -148,7 +148,7 @@ static struct layout layouts[NumLayouts] = {
 static struct key keys_full[] = {
   
 
-  {"Esc", "Esc", 1.25, Code, KEY_ESC, .scheme = 1},  
+  {"Esc", "Esc", 1.25, Code, KEY_ESC, .scheme = 3},  
   {"0", "0", 1.0, Code, KEY_0},
   {"1", "1", 1.0, Code, KEY_1},
   {"2", "2", 1.0, Code, KEY_2},
@@ -166,7 +166,7 @@ static struct key keys_full[] = {
   {"-", "-", 1.0, Code, KEY_MINUS},
   {"=", "=", 0.5, Code, KEY_EQUAL},
   {"|", "|", 0.5, Copy, 0x007c, (struct layout *)0, 0x007c},
-  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 1},
+  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 3},
   {"F1", "F1", 1.0, Code, KEY_F1, .scheme = 1},
   {"", "", 0.0, EndRow},
 
@@ -216,11 +216,11 @@ static struct key keys_full[] = {
   {"'", "'", 0.5, Code, KEY_APOSTROPHE},
   {"&", "&", 0.5, Copy, 0x0026, (struct layout *)0, 0x0026},
   {"+", "+", 0.5, Copy, 0x002b, (struct layout *)0, 0x002b},  
-  {"Enter", "Enter", 1.5, Code, KEY_ENTER, .scheme = 1},
+  {"Enter", "Enter", 2.5, Code, KEY_ENTER, .scheme = 3},
   {"F3", "F3", 1.0, Code, KEY_F3, .scheme = 1},
   {"", "", 0.0, EndRow},
 
-  {"⇧", "⇫", 1.7, Mod, Shift, .scheme = 1},
+  {"⇧", "⇫", 1.7, Mod, Shift, .scheme = 3},
   {"í", "Í", 1.0, Copy, 0x00ED, 0, 0x00CD},
   {"z", "Z", 1.0, Code, KEY_Z, &layouts[ComposeZ]},  
   {"x", "X", 1.0, Code, KEY_X, &layouts[ComposeX]},
@@ -247,7 +247,7 @@ static struct key keys_full[] = {
   {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
   //{"Sup", "Sup", 1.0, Mod, Super, .scheme = 1},
   {"Alt", "Alt", 1.0, Mod, Alt, .scheme = 1},
-  {"⎵", "⎵", 5.0, Code, KEY_SPACE},
+  {"⎵", "⎵", 5.0, Code, KEY_SPACE, .scheme = 3},
   {"AGr", "AGr", 1.0, Mod, AltGr, .scheme = 1},
   {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
   {"⏮", "⏮", 0.5, Code, KEY_PREVIOUSSONG, .scheme = 1},
