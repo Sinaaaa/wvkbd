@@ -2,7 +2,7 @@
 #define config_h_INCLUDED
 
 #define DEFAULT_FONT "Sans 18"
-#define DEFAULT_ROUNDING 5
+#define DEFAULT_ROUNDING 0
 static const int transparency = 170;
 
 struct clr_scheme schemes[] = {
