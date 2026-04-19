@@ -193,6 +193,7 @@ static struct key keys_full[] = {
   {"}", "}", 0.3, Copy, 0x007d, (struct layout *)0, 0x007d},  
   {":", ":", 0.3, Copy, 0x003a, (struct layout *)0, 0x003a},
   {"\\", "\\", 0.3, Code, KEY_BACKSLASH},
+  {"⌧", "⌧", 0.5, Code, KEY_DELETE, .scheme = 3},
   {"F2", "F2", 1.0, Code, KEY_F2, .scheme = 1},
   {"", "", 0.0, EndRow},
 
@@ -243,7 +244,7 @@ static struct key keys_full[] = {
   {"%", "%", 0.5, Copy, 0x0025, (struct layout *)0, 0x0025},  
   {"€", "€", 0.5, Copy, 0x20AC},
   {"—", "—", 0.5, Copy, 0x2014}, 
-  {"🔴", "🔴", 1.0, Copy, 0, (struct layout *)0},
+  {"🔴", "🔴", 1.5, Copy, 0, (struct layout *)0},
   {"F4", "F4", 1.0, Code, KEY_F4, .scheme = 1},  
   {"", "", 0.0, EndRow},
 
