@@ -1,9 +1,9 @@
 /* constants */
 /* how tall the keyboard should be by default (can be overriden) */
-#define KBD_PIXEL_HEIGHT 400
+#define KBD_PIXEL_HEIGHT 250
 
 /* how tall the keyboard should be by default (can be overriden) */
-#define KBD_PIXEL_LANDSCAPE_HEIGHT 400
+#define KBD_PIXEL_LANDSCAPE_HEIGHT 255
 
 /* spacing around each key */
 #define KBD_KEY_BORDER 2
@@ -162,9 +162,11 @@ static struct key keys_full[] = {
   {"ö", "Ö", 1.0, Copy, 0x00F6, 0, 0x00D6},
   {"ü", "Ü", 1.0, Copy, 0x00FC, 0, 0x00DC},
   {"ó", "Ó", 1.0, Copy, 0x00F3, 0, 0x00D3},
-  {"`", "`", 1.0, Code, KEY_GRAVE},
-  {"-", "-", 1.0, Code, KEY_MINUS},
+  {"`", "`", 0.5, Code, KEY_GRAVE},
+  {"-", "-", 0.5, Code, KEY_MINUS},
   {"=", "=", 0.5, Code, KEY_EQUAL},
+  {"^", "^", 0.5, Copy, 0x005E, .scheme = 1},
+  {"°", "°", 0.5, Copy, 0x00B0, .scheme = 1},
   {"|", "|", 0.5, Copy, 0x007c, (struct layout *)0, 0x007c},
   {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 3},
   {"F1", "F1", 1.0, Code, KEY_F1, .scheme = 1},
@@ -239,6 +241,8 @@ static struct key keys_full[] = {
   {"#", "#", 0.5, Copy, 0x0023, (struct layout *)0, 0x0023},
   {"$", "$", 0.5, Copy, 0x0024, (struct layout *)0, 0x0024},
   {"%", "%", 0.5, Copy, 0x0025, (struct layout *)0, 0x0025},  
+  {"€", "€", 0.5, Copy, 0x20AC},
+  {"—", "—", 0.5, Copy, 0x2014}, 
   {"🔴", "🔴", 1.0, Copy, 0, (struct layout *)0},
   {"F4", "F4", 1.0, Code, KEY_F4, .scheme = 1},  
   {"", "", 0.0, EndRow},
