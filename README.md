@@ -34,7 +34,7 @@ You also need [scdoc](https://git.sr.ht/~sircmpwn/scdoc/) to generate the docume
 
 After first build `make clean LAYOUT=sina` must be run before `make LAYOUT=sina`!
 To run my layout use the command `./wvkbd-sina -L 250` withing your wvkbd folder.
-
+My layout needs a 1080p display or higher, on 900p labels flow into each other already, If low res operation is desired, you need to edit the font size in the source code. 
 
 
 ## To contribute to the original wvkbd project
