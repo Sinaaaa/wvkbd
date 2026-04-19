@@ -16,7 +16,12 @@ This is my fork of wvkbd, beyond a custom HU layout I have also made some minor 
 
 -Added a media key section to the bottom row.
 
+-Fixed size function keys on the right. 
+
 -Theming choices..
+
+.
+<img width="1920" height="259" alt="20260419_08h36m38s_grim" src="https://github.com/user-attachments/assets/6a40a5eb-fe88-41a2-971d-6c0609f30f5a" />
 
 ## Dependencies
 
