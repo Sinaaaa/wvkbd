@@ -199,7 +199,7 @@ static struct key keys_full[] = {
 
   //{"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
 
-  {"Caps", "Caps", 1.0, Mod, CapsLock, .scheme = 1},
+  {"⟰", "⟰", 1.0, Mod, CapsLock, .scheme = 1},
   { "<", "<", 0.5, Code, 0 },
   { ">", ">", 0.5, Code, 0 },
   {"a", "A", 1.0, Code, KEY_A, &layouts[ComposeA]},
