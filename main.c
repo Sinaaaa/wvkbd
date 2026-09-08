@@ -3,6 +3,7 @@
 #include "proto/xdg-shell-client-protocol.h"
 #include "proto/fractional-scale-v1-client-protocol.h"
 #include "proto/viewporter-client-protocol.h"
+#include "proto/input-method-unstable-v2-protocol.h"
 #include <errno.h>
 #include <linux/input-event-codes.h>
 #include <stdio.h>
@@ -46,6 +47,7 @@ static struct wp_fractional_scale_v1 *wfs_draw_surf;
 static struct wp_fractional_scale_manager_v1 *wfs_mgr;
 static struct wp_viewport *draw_surf_viewport, *popup_draw_surf_viewport;
 static struct wp_viewporter *viewporter;
+static struct zwp_input_method_manager_v2 *im_mgr;
 static bool popup_xdg_surface_configured;
 static bool layer_surface_configured;
 
@@ -71,6 +73,7 @@ static struct kbd keyboard;
 static uint32_t height, normal_height, landscape_height;
 static int rounding = DEFAULT_ROUNDING;
 static bool hidden = false;
+static bool im_auto = false;
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -119,11 +122,31 @@ static void layer_surface_configure(void *data,
                                     uint32_t serial, uint32_t w, uint32_t h);
 static void layer_surface_closed(void *data,
                                  struct zwlr_layer_surface_v1 *surface);
+static void im_activate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2);
+static void im_deactivate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2);
+static void im_surrounding_text(void *data, struct zwp_input_method_v2 *zwp_input_method_v2,
+                                const char *text, uint32_t cursor, uint32_t anchor);
+static void im_text_change_cause(void *data, struct zwp_input_method_v2 *zwp_input_method_v2,
+                                 uint32_t cause);
+static void im_content_type(void *data, struct zwp_input_method_v2 *zwp_input_method_v2,
+                            uint32_t hint, uint32_t purpose);
+static void im_done(void *data, struct zwp_input_method_v2 *zwp_input_method_v2);
+static void im_unavailable(void *data, struct zwp_input_method_v2 *zwp_input_method_v2);
 static void redimension_keyboard();
 static void show();
 static void hide();
 
 /* event handlers */
+static const struct zwp_input_method_v2_listener input_method_listener = {
+    .activate = im_activate,
+    .deactivate = im_deactivate,
+    .surrounding_text = im_surrounding_text,
+    .text_change_cause = im_text_change_cause,
+    .content_type = im_content_type,
+    .done = im_done,
+    .unavailable = im_unavailable,
+};
+
 static const struct wl_pointer_listener pointer_listener = {
     .enter = wl_pointer_enter,
     .leave = wl_pointer_leave,
@@ -435,6 +458,8 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
                       zwp_virtual_keyboard_manager_v1_interface.name) == 0) {
         vkbd_mgr = wl_registry_bind(
             registry, name, &zwp_virtual_keyboard_manager_v1_interface, 1);
+    } else if (im_auto && strcmp(interface, zwp_input_method_manager_v2_interface.name) == 0) {
+        im_mgr = wl_registry_bind(registry, name, &zwp_input_method_manager_v2_interface, 1);
     }
 }
 
@@ -484,6 +509,44 @@ static const struct wp_fractional_scale_v1_listener
     wp_fractional_scale_listener = {
         .preferred_scale = wp_fractional_scale_preferred_scale,
 };
+
+void
+im_activate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+{
+    show();
+}
+
+void
+im_deactivate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+{
+    hide();
+}
+
+void
+im_surrounding_text(void *data, struct zwp_input_method_v2 *zwp_input_method_v2,
+                    const char *text, uint32_t cursor, uint32_t anchor)
+{
+}
+
+void im_text_change_cause(void *data, struct zwp_input_method_v2 *zwp_input_method_v2,
+                          uint32_t cause)
+{
+}
+
+void im_content_type(void *data, struct zwp_input_method_v2 *zwp_input_method_v2,
+                     uint32_t hint, uint32_t purpose)
+{
+}
+
+void
+im_done(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+{
+}
+
+void
+im_unavailable(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+{
+}
 
 void
 redimension_keyboard()
@@ -600,15 +663,20 @@ usage(char *argv0)
     fprintf(stderr, "  -R [int]    - Rounding radius in pixels\n");
     fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
     fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
+    fprintf(stderr, "  --no-popup             - Disable the key-press popup\n");
+    fprintf(stderr, "  --no-highlight         - Don't highlight a key while pressed\n");
+    fprintf(stderr, "  --no-feedback          - Disable all key-press feedback "
+                    "(--no-popup and --no-highlight)\n");
     fprintf(
         stderr,
         "  --alpha [int]          - Set alpha value for all colors [0-255]\n");
+    fprintf(stderr, "  --auto                 - Automatically toggle visibility based on focus\n");
     fprintf(stderr, "  --bg [rrggbb|aa]       - Set color of background\n");
     fprintf(stderr, "  --fg [rrggbb|aa]       - Set color of keys\n");
     fprintf(stderr, "  --fg-sp [rrggbb|aa]    - Set color of special keys\n");
-    fprintf(stderr, "  --press [rrggbb|aa]     - Set color of pressed keys\n");
+    fprintf(stderr, "  --press [rrggbb|aa]    - Set color of pressed keys\n");
     fprintf(stderr,
-            "  --press-sp [rrggbb|aa]  - Set color of pressed special keys\n");
+            "  --press-sp [rrggbb|aa] - Set color of pressed special keys\n");
     fprintf(stderr, "  --swipe [rrggbb|aa]    - Set color of swiped keys\n");
     fprintf(stderr,
             "  --swipe-sp [rrggbb|aa] - Set color of swiped special keys\n");
@@ -616,20 +684,20 @@ usage(char *argv0)
     fprintf(stderr,
             "  --text-sp [rrggbb|aa]  - Set color of text on special keys\n");
     fprintf(stderr,
-            "  --text-press [rrggbb|aa]  - Set color of text on pressed keys\n");
+            "  --text-press [rrggbb|aa]    - Set color of text on pressed keys\n");
     fprintf(stderr,
-            "  --text-press-sp [rrggbb|aa]  - Set color of text on pressed special keys\n");
+            "  --text-press-sp [rrggbb|aa] - Set color of text on pressed special keys\n");
     fprintf(stderr,
-            "  --text-swipe [rrggbb|aa]  - Set color of text on swiped keys\n");
+            "  --text-swipe [rrggbb|aa]    - Set color of text on swiped keys\n");
     fprintf(stderr,
-            "  --text-swipe-sp [rrggbb|aa]  - Set color of text on swiped special keys\n");
+            "  --text-swipe-sp [rrggbb|aa] - Set color of text on swiped special keys\n");
     fprintf(stderr,
-            "  --list-layers          - Print the list of available layers\n");
+            "  --list-layers      - Print the list of available layers\n");
     fprintf(stderr,
-            "  -l                     - Comma separated list of layers\n");
-    fprintf(stderr, "  --landscape-layers     - Comma separated list of "
+            "  -l                 - Comma separated list of layers\n");
+    fprintf(stderr, "  --landscape-layers - Comma separated list of "
                     "landscape layers\n");
-    fprintf(stderr, "  --non-exclusive        - Allow the keyboard to overlap"
+    fprintf(stderr, "  --non-exclusive    - Allow the keyboard to overlap"
                     " windows. Do not request an exclusive zone from the"
                     "compositor\n");
 }
@@ -809,6 +877,8 @@ main(int argc, char **argv)
     keyboard.preferred_scale = 1;
     keyboard.preferred_fractional_scale = 0;
     keyboard.exclusive = true;
+    keyboard.show_popup = true;
+    keyboard.show_highlight = true;
 
     uint8_t alpha = 0;
     bool alpha_defined = false;
@@ -968,12 +1038,25 @@ main(int argc, char **argv)
         } else if ((!strcmp(argv[i], "-hidden")) ||
                    (!strcmp(argv[i], "--hidden"))) {
             hidden = true;
+        } else if ((!strcmp(argv[i], "-no-popup")) ||
+                   (!strcmp(argv[i], "--no-popup"))) {
+            keyboard.show_popup = false;
+        } else if ((!strcmp(argv[i], "-no-highlight")) ||
+                   (!strcmp(argv[i], "--no-highlight"))) {
+            keyboard.show_highlight = false;
+        } else if ((!strcmp(argv[i], "-no-feedback")) ||
+                   (!strcmp(argv[i], "--no-feedback"))) {
+            keyboard.show_popup = false;
+            keyboard.show_highlight = false;
         } else if ((!strcmp(argv[i], "-list-layers")) ||
                    (!strcmp(argv[i], "--list-layers"))) {
             list_layers();
             exit(0);
         } else if ((!strcmp(argv[i], "-non-exclusive")) || (!strcmp(argv[i], "--non-exclusive"))) {
             keyboard.exclusive = false;
+        } else if ((!strcmp(argv[i], "-auto")) ||
+                   (!strcmp(argv[i], "--auto"))) {
+            im_auto = true;
         } else {
             fprintf(stderr, "Invalid argument: %s\n", argv[i]);
             usage(argv[0]);
@@ -1053,6 +1136,12 @@ main(int argc, char **argv)
 
     kbd_init(&keyboard, (struct layout *)&layouts, layer_names_list,
              landscape_layer_names_list);
+
+    if (im_mgr != NULL) {
+        struct zwp_input_method_v2 *input_method =
+            zwp_input_method_manager_v2_get_input_method(im_mgr, seat);
+        zwp_input_method_v2_add_listener(input_method, &input_method_listener, NULL);
+    }
 
     for (i = 0; i < countof(schemes); i++) {
         schemes[i].font_description =

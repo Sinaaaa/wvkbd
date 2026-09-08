@@ -51,12 +51,28 @@ can be patched to add new features.
 *--hidden*
 	Start hidden (send SIGUSR2 to show).
 
+*--no-popup*
+	Disable the key-press popup (the magnified key shown above a key while
+	it is held). Useful for privacy, e.g. when typing on a lockscreen.
+
+*--no-highlight*
+	Don't highlight a key while it is pressed (draw it the same as an
+	unpressed key). Useful for privacy, e.g. when typing on a lockscreen.
+
+*--no-feedback*
+	Disable all visual key-press feedback; shorthand for *--no-popup* and
+	*--no-highlight* together.
+
 *--non-exclusive*
 	Allow keyboard to overlap existing windows, do not request an
 	exclusive zone from the compositor.
 
 *--alpha* _int_
 	Set alpha value (i.e. transparency) for all colors [0-255]
+	
+*--auto*
+	Automatically toggle keyboard :visibility based on focus. Requires a compositor
+	that implements the zwp_input_method_v2 protocol.
 	
 *--bg* _rrggbb|aa_ 
 	Set color of background
